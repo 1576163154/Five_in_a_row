@@ -86,8 +86,8 @@ public class Panel extends View {
             return false;
         }
         if (action == MotionEvent.ACTION_UP) {
-            int x = (int) (event.getX() );
-            int y = (int) (event.getY() );//获取用户 触屏 点击的坐标值
+            int x = (int) (event.getX());
+            int y = (int) (event.getY());//获取用户 触屏 点击的坐标值
             Log.d("LocationX", String.valueOf(x));
             Log.d("LocationY", String.valueOf(y));
             Point p = getValidPoint(x, y);//转换为规范的数组，便于之后判断游戏状态
@@ -120,8 +120,9 @@ public class Panel extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         init(canvas);
+        canvas.save();
         drawPiece(canvas);
-        checkGameOver();
+        checkGameOver(canvas);
     }
 
     private void drawPiece(Canvas canvas) {
@@ -165,13 +166,14 @@ public class Panel extends View {
 //        } 由于是 所画棋盘较为特殊，故交换x，y可画竖线
     }
 
-    private void checkGameOver() {
+    private void checkGameOver(Canvas canvas) {
         boolean whiteWin = checkFiveInLine(whiteArray);
         boolean blackWin = checkFiveInLine(blackArray);
         if (whiteWin || blackWin) {
             isGameOver = true;
             isWhiteWinner = whiteWin;
             Toast.makeText(getContext(), isWhiteWinner ? "白棋赢了！" : "黑棋赢了！", Toast.LENGTH_LONG).show();
+            canvas.restore();
         }
     }
 
@@ -195,27 +197,12 @@ public class Panel extends View {
 
     //水平方向上的比较
     private boolean checkHorizontal(int x, int y, List<Point> points) {
-        int count = 1;//计数器
-        for (int i = 0; i < MAXNUMs; i++) {
-            //该棋子向左4个
-            if (points.contains(new Point(x - i, y))) {
-                count++;
-            } else {
-                break;
-            }
-            if (count == MAXNUMs) {
-                return true;
-            }
-        }
-        for (int i = 0; i < MAXNUMs; i++) {
-            //向右
-            if (points.contains(new Point(x + i, y))) {
-                count++;
-            } else {
-                break;
-            }
-        }
-        if (count == MAXNUMs) {
+        //该棋子向右4个
+        if (points.contains(new Point(x, y)) &&
+                points.contains(new Point(x + 1, y)) &&
+                points.contains(new Point(x + 2, y)) &&
+                points.contains(new Point(x + 3, y)) &&
+                points.contains(new Point(x + 4, y))) {
             return true;
         }
         return false;
@@ -223,24 +210,11 @@ public class Panel extends View {
 
     //垂直方向
     private boolean checkVertical(int x, int y, List<Point> points) {
-        int count = 1;//计数器
-        for (int i = 0; i < MAXNUMs; i++) {
-            //该棋子向上4个
-            if (points.contains(new Point(x, y - i))) {
-                count++;
-            } else {
-                break;
-            }
-        }
-        for (int i = 0; i < MAXNUMs; i++) {
-            //向下
-            if (points.contains(new Point(x, y + i))) {
-                count++;
-            } else {
-                break;
-            }
-        }
-        if (count == MAXNUMs) {
+        if (points.contains(new Point(x, y)) &&
+                points.contains(new Point(x, y + 1)) &&
+                points.contains(new Point(x, y + 2)) &&
+                points.contains(new Point(x, y + 3)) &&
+                points.contains(new Point(x, y + 4))) {
             return true;
         }
         return false;
@@ -248,48 +222,22 @@ public class Panel extends View {
 
     //左斜
     private boolean checkLeftDiagonal(int x, int y, List<Point> points) {
-        int count = 1;//计数器
-        for (int i = 0; i < MAXNUMs; i++) {
-            //该棋子斜向上4个
-            if (points.contains(new Point(x + i, y - i))) {
-                count++;
-            } else {
-                break;
-            }
-        }
-        for (int i = 0; i < MAXNUMs; i++) {
-            //斜向下
-            if (points.contains(new Point(x - i, y + i))) {
-                count++;
-            } else {
-                break;
-            }
-        }
-        if (count == MAXNUMs) {
+        if (points.contains(new Point(x, y)) &&
+                points.contains(new Point(x - 1, y + 1)) &&
+                points.contains(new Point(x - 2, y + 2)) &&
+                points.contains(new Point(x - 3, y + 3)) &&
+                points.contains(new Point(x - 4, y + 4))) {
             return true;
         }
         return false;
     }
 
     private boolean checkRightDiagonal(int x, int y, List<Point> points) {
-        int count = 1;//计数器
-        for (int i = 0; i < MAXNUMs; i++) {
-            //该棋子斜向上4个
-            if (points.contains(new Point(x - i, y - i))) {
-                count++;
-            } else {
-                break;
-            }
-        }
-        for (int i = 0; i < MAXNUMs; i++) {
-            //斜向下
-            if (points.contains(new Point(x + i, y + i))) {
-                count++;
-            } else {
-                break;
-            }
-        }
-        if (count == MAXNUMs) {
+        if (points.contains(new Point(x, y)) &&
+                points.contains(new Point(x + 1, y+1)) &&
+                points.contains(new Point(x + 2, y+2)) &&
+                points.contains(new Point(x + 3, y+3)) &&
+                points.contains(new Point(x + 4, y+4))) {
             return true;
         }
         return false;
