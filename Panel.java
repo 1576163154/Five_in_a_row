@@ -7,6 +7,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -25,8 +27,8 @@ public class Panel extends View {
     private Bitmap bpiece;//可作为属性
     private float ratio = 3 / 4 * 1.0f;//设置棋子大小为行高的3/4
 
-    private List<Point> whiteArray = new ArrayList<>();//声明两个 存储 用户touch坐标x，y的泛型数组
-    private List<Point> blackArray = new ArrayList<>();
+    private ArrayList<Point> whiteArray = new ArrayList<>();//声明两个 存储 用户touch坐标x，y的泛型数组
+    private ArrayList<Point> blackArray = new ArrayList<>();
     private boolean isWhite = false;//声明一个布尔类型 确定 白棋先手，当前该谁
 
     private Paint panelpaint = new Paint();
@@ -300,5 +302,35 @@ public class Panel extends View {
             return true;
         }
         return false;
+    }
+
+    //再来一局
+    public void oneMoreGame(){
+        whiteArray.clear();
+        blackArray.clear();
+        isGameOver = false;
+        isWhiteWinner = false;
+        invalidate();//重绘
+    }
+
+    //view的存储与恢复（常见于内存不足进程被系统杀死，切换屏幕方向）
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("instance",super.onSaveInstanceState());
+        bundle.putParcelableArrayList("whitelist", whiteArray);
+        bundle.putParcelableArrayList("blacklist", blackArray);
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof  Bundle && state != null){
+            Bundle bundle = (Bundle) state;
+            whiteArray = bundle.getParcelableArrayList("whitelist");
+            blackArray = bundle.getParcelableArrayList("blacklist");
+            super.onRestoreInstanceState(bundle.getParcelable("instance"));
+        }
+        super.onRestoreInstanceState(state);
     }
 }
