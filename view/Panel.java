@@ -1,4 +1,4 @@
-package com.example.administrator.five_in_a_row;
+package com.example.administrator.five_in_a_row.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
+
+import com.example.administrator.five_in_a_row.R;
 
 import java.util.ArrayList;
 import java.util.List;

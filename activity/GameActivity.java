@@ -1,12 +1,15 @@
-package com.example.administrator.five_in_a_row;
+package com.example.administrator.five_in_a_row.activity;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+import com.example.administrator.five_in_a_row.R;
+import com.example.administrator.five_in_a_row.view.Panel;
+
+public class GameActivity extends AppCompatActivity {
     private Panel panel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
