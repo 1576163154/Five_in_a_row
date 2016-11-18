@@ -13,6 +13,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.example.administrator.five_in_a_row.R;
@@ -23,15 +24,20 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/8/16.
  */
-public class Panel extends View {
+public class ChessPanel extends View {
 
     private Bitmap wpiece;
     private Bitmap bpiece;//可作为属性
     private float ratio = 3 / 4 * 1.0f;//设置棋子大小为行高的3/4
+    private WindowManager windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
 
     private ArrayList<Point> whiteArray = new ArrayList<>();//声明两个 存储 用户touch坐标x，y的泛型数组
     private ArrayList<Point> blackArray = new ArrayList<>();
     private boolean isWhite = false;//声明一个布尔类型 确定 白棋先手，当前该谁
+
+    public boolean isWhite() {
+        return isWhite;
+    }
 
     private Paint panelpaint = new Paint();
     private int panelwidth;//画布宽度
@@ -41,9 +47,8 @@ public class Panel extends View {
 
     private boolean isGameOver;
     private boolean isWhiteWinner;
-    private int MAXNUMs = 7;
 
-    public Panel(Context context, AttributeSet attrs) {
+    public ChessPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
         setBackgroundColor(0x44ff0000);//用来看实际 view 的大小，后面可以删除或注释
         panelpaint.setColor(Color.BLACK);
@@ -63,6 +68,13 @@ public class Panel extends View {
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        //view 默认大小为屏幕宽度
+        if (widthMode == MeasureSpec.AT_MOST) {
+            widthSize = windowManager.getDefaultDisplay().getWidth();
+        }
+        if (heightMode == MeasureSpec.AT_MOST) {
+            heightSize = windowManager.getDefaultDisplay().getWidth();
+        }
         int width = Math.min(widthSize, heightSize);
         if (widthMode == MeasureSpec.UNSPECIFIED) {
             width = heightSize;
@@ -78,7 +90,7 @@ public class Panel extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         panelwidth = w;
         lineheight = (float) panelwidth / MAX_LINE;
-        pieceWidth = (int) (lineheight * ratio);//动态确定棋子大小
+        pieceWidth = (int) (lineheight * ratio + 0.5);//动态确定棋子大小
         wpiece = Bitmap.createScaledBitmap(wpiece, 57, 57, false);
         bpiece = Bitmap.createScaledBitmap(bpiece, 57, 57, false);
     }
@@ -115,7 +127,7 @@ public class Panel extends View {
 
     private Point getValidPoint(int x, int y) {
         //由于之前绘制棋盘时已经将横纵坐标都加了0.MAXNUMs lineheight，故这里就将棋盘上的点固定为（0,0）（1,0）
-        //                                                                                                                                                                                                               (1,0)
+        //                                                                                                                                                                                                                                  (1,0)
         Point O = new Point((int) (x / lineheight), (int) (y / lineheight));
         return O;
     }
@@ -238,76 +250,18 @@ public class Panel extends View {
 
     private boolean checkRightDiagonal(int x, int y, List<Point> points) {
         if (points.contains(new Point(x, y)) &&
-                points.contains(new Point(x + 1, y+1)) &&
-                points.contains(new Point(x + 2, y+2)) &&
-                points.contains(new Point(x + 3, y+3)) &&
-                points.contains(new Point(x + 4, y+4))) {
+                points.contains(new Point(x + 1, y + 1)) &&
+                points.contains(new Point(x + 2, y + 2)) &&
+                points.contains(new Point(x + 3, y + 3)) &&
+                points.contains(new Point(x + 4, y + 4))) {
             return true;
         }
         return false;
     }
 
-    //直接比较4个方向
-    private boolean checkHVD(int x, int y, List<Point> points) {
-        int count = 1;//计数器
-
-
-        for (int i = 0; i < MAXNUMs; i++) {
-
-            if (points.contains(new Point(x, y - i))) {
-                count++;
-            } else {
-                count = 1;
-            }
-            //向下
-            if (points.contains(new Point(x, y + i))) {
-                count++;
-            } else {
-                count = 1;
-            }
-            if (points.contains(new Point(x - i, y))) {
-                count++;
-            } else {
-                count = 1;
-            }
-            //向右
-            if (points.contains(new Point(x + i, y))) {
-                count++;
-            } else {
-                count = 1;
-            }
-            //该棋子斜向上4个
-            if (points.contains(new Point(x - i, y - i))) {
-                count++;
-            } else {
-                count = 1;
-            }
-            //斜向下
-            if (points.contains(new Point(x + i, y + i))) {
-                count++;
-            } else {
-                count = 1;
-            }
-            if (points.contains(new Point(x + i, y - i))) {
-                count++;
-            } else {
-                count = 1;
-            }
-            //斜向下
-            if (points.contains(new Point(x - i, y + i))) {
-                count++;
-            } else {
-                count = 1;
-            }
-        }
-        if (count == MAXNUMs) {
-            return true;
-        }
-        return false;
-    }
 
     //再来一局
-    public void oneMoreGame(){
+    public void oneMoreGame() {
         whiteArray.clear();
         blackArray.clear();
         isGameOver = false;
@@ -315,11 +269,38 @@ public class Panel extends View {
         invalidate();//重绘
     }
 
+    //悔棋
+    public void withDraw() {
+        if (whiteArray.size() > 0 || blackArray.size() > 0) {
+            if (blackArray.size() > 0&&isWhite) {
+                int blackIndex = blackArray.size() - 1;
+                blackArray.remove(blackIndex);
+                isWhite = !isWhite;
+                invalidate();
+            } else if (whiteArray.size() > 0 && !isWhite){
+                int whiteIndex = whiteArray.size() - 1;
+                whiteArray.remove(whiteIndex);
+                isWhite = !isWhite;
+                invalidate();
+            }
+        }else {
+            Toast.makeText(getContext(),"没棋了!",Toast.LENGTH_SHORT).show();
+        }
+    }
+    //判断棋盘上棋子是否为空
+    public boolean isPanelEmpty(){
+        if (whiteArray.size() > 0 || blackArray.size() > 0){
+            return false;
+        }else {
+            return true;
+        }
+    }
+
     //view的存储与恢复（常见于内存不足进程被系统杀死，切换屏幕方向）
     @Override
     protected Parcelable onSaveInstanceState() {
         Bundle bundle = new Bundle();
-        bundle.putParcelable("instance",super.onSaveInstanceState());
+        bundle.putParcelable("instance", super.onSaveInstanceState());
         bundle.putParcelableArrayList("whitelist", whiteArray);
         bundle.putParcelableArrayList("blacklist", blackArray);
         return bundle;
@@ -327,7 +308,7 @@ public class Panel extends View {
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
-        if (state instanceof  Bundle && state != null){
+        if (state instanceof Bundle && state != null) {
             Bundle bundle = (Bundle) state;
             whiteArray = bundle.getParcelableArrayList("whitelist");
             blackArray = bundle.getParcelableArrayList("blacklist");
