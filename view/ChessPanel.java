@@ -1,6 +1,7 @@
 package com.example.administrator.five_in_a_row.view;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -9,14 +10,19 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.v7.app.AlertDialog;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.administrator.five_in_a_row.R;
+import com.example.administrator.five_in_a_row.activity.GameActivity;
+import com.example.administrator.five_in_a_row.activity.MenuActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +40,8 @@ public class ChessPanel extends View {
     private ArrayList<Point> whiteArray = new ArrayList<>();//声明两个 存储 用户touch坐标x，y的泛型数组
     private ArrayList<Point> blackArray = new ArrayList<>();
     private boolean isWhite = false;//声明一个布尔类型 确定 白棋先手，当前该谁
+    private Point lastWhitePoint;//白棋当前最后一步
+    private Point lastBlackPoint;
 
     public boolean isWhite() {
         return isWhite;
@@ -45,7 +53,16 @@ public class ChessPanel extends View {
     private int MAX_LINE = 10;//行数可作为view属性 公开
     private int pieceWidth;//棋子宽度
 
+    public boolean isGameOver() {
+        return isGameOver;
+    }
+
     private boolean isGameOver;
+
+    public boolean isWhiteWinner() {
+        return isWhiteWinner;
+    }
+
     private boolean isWhiteWinner;
 
     public ChessPanel(Context context, AttributeSet attrs) {
@@ -140,7 +157,6 @@ public class ChessPanel extends View {
         drawPiece(canvas);
         checkGameOver(canvas);
     }
-
     private void drawPiece(Canvas canvas) {
         //优化，避免每次都要计算list元素个数
         int m = whiteArray.size();
@@ -149,14 +165,28 @@ public class ChessPanel extends View {
             //另外画位图，和画文本类似。起点坐标都为所画位图的左上角（注 坐标原点在画布左上角）
             canvas.drawBitmap(wpiece, whitePoint.x * lineheight + lineheight / 8,
                     whitePoint.y * lineheight + lineheight / 8, null);
+            lastWhitePoint = whiteArray.get(m -1);
         }
         int n = blackArray.size();
         for (int i = 0; i < n; i++) {
             Point blackPoint = blackArray.get(i);
             canvas.drawBitmap(bpiece, blackPoint.x * lineheight + lineheight / 8,
                     blackPoint.y * lineheight + lineheight / 8, null);
+            lastBlackPoint = blackArray.get(n - 1);
+        }
+        Paint redPaint = new Paint();
+        redPaint.setColor(Color.RED);
+        redPaint.setStrokeWidth(2.0f);
+        redPaint.setStyle(Paint.Style.STROKE);
+        if (m > 0&& !isWhite){
+            //给白棋最后一个棋子画个圆圈
+            canvas.drawCircle(lastWhitePoint.x*lineheight+lineheight/2,lastWhitePoint.y*lineheight+lineheight/2,29f,redPaint);
+        }else if (n > 0 && isWhite){
+            //同理给黑棋
+            canvas.drawCircle(lastBlackPoint.x*lineheight+lineheight/2,lastBlackPoint.y*lineheight+lineheight/2,29f,redPaint);
         }
     }
+
 
     private void init(Canvas canvas) {
         int w = panelwidth;//画布宽度
