@@ -26,7 +26,12 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private Resources res;
 
     private boolean threadFlag = true;
-    private Thread tv_Thread;
+    private Thread th_whoturn;//判断当前该谁落子
+    private Thread th_winner;
+    private AlertDialog gameOverDialog;
+    private TextView tv_winner;
+    private Button btn_win_onemoregame;
+    private Button btn_win_backtomenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +41,9 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         res = this.getResources();
         initWidget();
         setWidget();
-        tv_Thread.start();
+        th_whoturn.start();
+//        th_winner.start();;
+
     }
 
     private void initWidget() {
@@ -44,29 +51,44 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         tv_title_who = (TextView) findViewById(R.id.tv_title_who);
         btn_back = (Button) findViewById(R.id.btn_back);
         btn_withdraw = (Button) findViewById(R.id.btn_withdraw);
-
-       
     }
 
     private void setWidget() {
         btn_back.setOnClickListener(this);
         btn_withdraw.setOnClickListener(this);
 //异步任务，改变tv_who文本信息
-        tv_Thread =  new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Message message = new Message();
-                    if (chessPanel.isWhite()) {
-                        message.what = 1;
-                    } else {
-                        message.what = 2;
-                    }
-                    handler.postDelayed(tv_Thread,200);//添加线程执行延迟
-                    handler.sendMessage(message);
+        th_whoturn = new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-                }
-            });
-        }
+                    Message whoturn_msg = new Message();
+                    if (chessPanel.isWhite()) {
+                        whoturn_msg.what = 1;
+                    } else {
+                        whoturn_msg.what = 2;
+                    }
+                    handler.postDelayed(th_whoturn, 200);//添加线程执行延迟
+                    handler.sendMessage(whoturn_msg);
+
+            }
+        });
+        //判断胜者
+//        th_winner = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (chessPanel.isGameOver()){
+//                    Message winner_msg = new Message();
+//                        if (chessPanel.isWhiteWinner()) {
+//                            winner_msg.what = 3;
+//                        } else {
+//                            winner_msg.what = 4;
+//                        }
+//                        handler.postDelayed(th_winner,200);
+//                        handler.sendMessage(winner_msg);
+//                }
+//            }
+//        });
+    }
 
 
     @Override
@@ -76,7 +98,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 chessPanel.withDraw();
                 break;
             case R.id.btn_back:
-                if (chessPanel.isPanelEmpty() ) {
+                if (chessPanel.isPanelEmpty()||chessPanel.isGameOver()) {
                     startActivity(new Intent(GameActivity.this, MenuActivity.class));
                 } else {
                     //弹窗询问
@@ -95,10 +117,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                     btn_back_confirm.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            startActivity(new Intent(GameActivity.this,MenuActivity.class));
+                            startActivity(new Intent(GameActivity.this, MenuActivity.class));
                         }
                     });
                 }
+                break;
+            default:
+                break;
 
         }
     }
@@ -112,15 +137,31 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 case 2:
                     tv_title_who.setText(res.getString(R.string.blackpiece));
                     break;
+//                case 3:
+//                    //初始化游戏中某方获胜时的弹出
+//                    gameOverDialog = new AlertDialog.Builder(GameActivity.this).create();
+//                    gameOverDialog.show();
+//                    Window window = gameOverDialog.getWindow();
+//                    window.setContentView(R.layout.gameover_dialog);
+//                    tv_winner = (TextView) window.findViewById(R.id.tv_winner);
+//                    btn_win_onemoregame = (Button) window.findViewById(R.id.btn_win_onemoregame);
+//                    btn_win_backtomenu = (Button) window.findViewById(R.id.btn_win_backtomenu);
+//                    tv_winner.setText(res.getString(R.string.whitewin));
+//                    break;
+//                case 4:
+//                    gameOverDialog.show();
+//                    tv_winner.setText(res.getString(R.string.blackwin));
+//                    break;
                 default:
                     break;
             }
         }
     };
 
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode ==  event.KEYCODE_BACK){
+        if (keyCode == event.KEYCODE_BACK) {
             final AlertDialog backDialog = new AlertDialog.Builder(GameActivity.this).create();
             backDialog.show();
             Window window = backDialog.getWindow();
@@ -136,7 +177,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             btn_back_confirm.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startActivity(new Intent(GameActivity.this,MenuActivity.class));
+                    startActivity(new Intent(GameActivity.this, MenuActivity.class));
                 }
             });
             return true;
@@ -153,13 +194,21 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         Window window = menuDialog.getWindow();
         window.setContentView(R.layout.gameactivity_menu_dialog);
         TextView tv_resume = (TextView) window.findViewById(R.id.tv_gameactivity_resume);
-        TextView tv_whoturn = (TextView) window.findViewById(R.id.tv_who_turn);
+        TextView tv_newgame = (TextView) window.findViewById(R.id.tv_newgame);
         tv_resume.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 menuDialog.dismiss();
             }
         });
+        tv_newgame.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chessPanel.oneMoreGame();
+                menuDialog.dismiss();
+            }
+        });
+        //游戏设置 暂定
         return false;//不弹出默认的菜单弹出
     }
 

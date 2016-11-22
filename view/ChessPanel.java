@@ -1,5 +1,6 @@
 package com.example.administrator.five_in_a_row.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -18,11 +19,13 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.five_in_a_row.R;
 import com.example.administrator.five_in_a_row.activity.GameActivity;
 import com.example.administrator.five_in_a_row.activity.MenuActivity;
+import com.example.administrator.five_in_a_row.util.Planel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -153,9 +156,8 @@ public class ChessPanel extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         init(canvas);
-        canvas.save();
         drawPiece(canvas);
-        checkGameOver(canvas);
+        checkGameOver();
     }
     private void drawPiece(Canvas canvas) {
         //优化，避免每次都要计算list元素个数
@@ -212,82 +214,15 @@ public class ChessPanel extends View {
 //        } 由于是 所画棋盘较为特殊，故交换x，y可画竖线
     }
 
-    private void checkGameOver(Canvas canvas) {
-        boolean whiteWin = checkFiveInLine(whiteArray);
-        boolean blackWin = checkFiveInLine(blackArray);
+    private void checkGameOver() {
+        boolean whiteWin = Planel.checkFiveInLine(whiteArray);
+        boolean blackWin = Planel.checkFiveInLine(blackArray);
         if (whiteWin || blackWin) {
             isGameOver = true;
             isWhiteWinner = whiteWin;
-            Toast.makeText(getContext(), isWhiteWinner ? "白棋赢了！" : "黑棋赢了！", Toast.LENGTH_LONG).show();
-            canvas.restore();
         }
     }
 
-    //判断相邻的同色4个棋子是否满足4个方向的连续MAXNUMs个
-    private boolean checkFiveInLine(List<Point> points) {
-        for (Point p :
-                points) {
-            int x = p.x;
-            int y = p.y;
-            boolean win = checkHorizontal(x, y, points);
-            if (win) return true;
-            win = checkVertical(x, y, points);
-            if (win) return true;
-            win = checkLeftDiagonal(x, y, points);
-            if (win) return true;
-            win = checkRightDiagonal(x, y, points);
-            if (win) return true;
-        }
-        return false;
-    }
-
-    //水平方向上的比较
-    private boolean checkHorizontal(int x, int y, List<Point> points) {
-        //该棋子向右4个
-        if (points.contains(new Point(x, y)) &&
-                points.contains(new Point(x + 1, y)) &&
-                points.contains(new Point(x + 2, y)) &&
-                points.contains(new Point(x + 3, y)) &&
-                points.contains(new Point(x + 4, y))) {
-            return true;
-        }
-        return false;
-    }
-
-    //垂直方向
-    private boolean checkVertical(int x, int y, List<Point> points) {
-        if (points.contains(new Point(x, y)) &&
-                points.contains(new Point(x, y + 1)) &&
-                points.contains(new Point(x, y + 2)) &&
-                points.contains(new Point(x, y + 3)) &&
-                points.contains(new Point(x, y + 4))) {
-            return true;
-        }
-        return false;
-    }
-
-    //左斜
-    private boolean checkLeftDiagonal(int x, int y, List<Point> points) {
-        if (points.contains(new Point(x, y)) &&
-                points.contains(new Point(x - 1, y + 1)) &&
-                points.contains(new Point(x - 2, y + 2)) &&
-                points.contains(new Point(x - 3, y + 3)) &&
-                points.contains(new Point(x - 4, y + 4))) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean checkRightDiagonal(int x, int y, List<Point> points) {
-        if (points.contains(new Point(x, y)) &&
-                points.contains(new Point(x + 1, y + 1)) &&
-                points.contains(new Point(x + 2, y + 2)) &&
-                points.contains(new Point(x + 3, y + 3)) &&
-                points.contains(new Point(x + 4, y + 4))) {
-            return true;
-        }
-        return false;
-    }
 
 
     //再来一局
@@ -304,11 +239,17 @@ public class ChessPanel extends View {
         if (whiteArray.size() > 0 || blackArray.size() > 0) {
             if (blackArray.size() > 0&&isWhite) {
                 int blackIndex = blackArray.size() - 1;
+                if (isGameOver){
+                    isGameOver = !isGameOver;
+                }
                 blackArray.remove(blackIndex);
                 isWhite = !isWhite;
                 invalidate();
             } else if (whiteArray.size() > 0 && !isWhite){
                 int whiteIndex = whiteArray.size() - 1;
+                if (isGameOver){
+                    isGameOver = !isGameOver;
+                }
                 whiteArray.remove(whiteIndex);
                 isWhite = !isWhite;
                 invalidate();
