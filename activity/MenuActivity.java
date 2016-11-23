@@ -46,6 +46,7 @@ public class MenuActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MenuActivity.this,GameActivity.class));
+                overridePendingTransition(R.anim.fade,R.anim.hold);
             }
         });
         tv_exit.setOnClickListener(new View.OnClickListener() {

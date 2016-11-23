@@ -70,7 +70,7 @@ public class ChessPanel extends View {
 
     public ChessPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setBackgroundColor(0x44ff0000);//用来看实际 view 的大小，后面可以删除或注释
+        setBackgroundColor(Color.parseColor("#deb887"));//用来看实际 view 的大小，后面可以删除或注释
         panelpaint.setColor(Color.BLACK);
         panelpaint.setAntiAlias(true);
         panelpaint.setDither(true);
@@ -159,6 +159,7 @@ public class ChessPanel extends View {
         drawPiece(canvas);
         checkGameOver();
     }
+
     private void drawPiece(Canvas canvas) {
         //优化，避免每次都要计算list元素个数
         int m = whiteArray.size();
@@ -167,7 +168,7 @@ public class ChessPanel extends View {
             //另外画位图，和画文本类似。起点坐标都为所画位图的左上角（注 坐标原点在画布左上角）
             canvas.drawBitmap(wpiece, whitePoint.x * lineheight + lineheight / 8,
                     whitePoint.y * lineheight + lineheight / 8, null);
-            lastWhitePoint = whiteArray.get(m -1);
+            lastWhitePoint = whiteArray.get(m - 1);
         }
         int n = blackArray.size();
         for (int i = 0; i < n; i++) {
@@ -180,12 +181,12 @@ public class ChessPanel extends View {
         redPaint.setColor(Color.RED);
         redPaint.setStrokeWidth(2.0f);
         redPaint.setStyle(Paint.Style.STROKE);
-        if (m > 0&& !isWhite){
+        if (m > 0 && !isWhite) {
             //给白棋最后一个棋子画个圆圈
-            canvas.drawCircle(lastWhitePoint.x*lineheight+lineheight/2,lastWhitePoint.y*lineheight+lineheight/2,29f,redPaint);
-        }else if (n > 0 && isWhite){
+            canvas.drawCircle(lastWhitePoint.x * lineheight + lineheight / 2, lastWhitePoint.y * lineheight + lineheight / 2, 29f, redPaint);
+        } else if (n > 0 && isWhite) {
             //同理给黑棋
-            canvas.drawCircle(lastBlackPoint.x*lineheight+lineheight/2,lastBlackPoint.y*lineheight+lineheight/2,29f,redPaint);
+            canvas.drawCircle(lastBlackPoint.x * lineheight + lineheight / 2, lastBlackPoint.y * lineheight + lineheight / 2, 29f, redPaint);
         }
     }
 
@@ -220,9 +221,29 @@ public class ChessPanel extends View {
         if (whiteWin || blackWin) {
             isGameOver = true;
             isWhiteWinner = whiteWin;
+            final AlertDialog winnerDialog = new AlertDialog.Builder(getContext()).create();
+            winnerDialog.show();
+            Window window = winnerDialog.getWindow();
+            window.setContentView(R.layout.gameover_dialog);
+            Button btn_onemoregame = (Button) window.findViewById(R.id.btn_win_onemoregame);
+            Button btn_nomoregame = (Button) window.findViewById(R.id.btn_win_nomoregame);
+            TextView tv_winner = (TextView) window.findViewById(R.id.tv_winner);
+            tv_winner.setText(isWhiteWinner?"白棋胜利！":"黑棋胜利！");
+            btn_nomoregame.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    winnerDialog.dismiss();
+                }
+            });
+            btn_onemoregame.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    oneMoreGame();
+                    winnerDialog.dismiss();
+                }
+            });
         }
     }
-
 
 
     //再来一局
@@ -237,32 +258,33 @@ public class ChessPanel extends View {
     //悔棋
     public void withDraw() {
         if (whiteArray.size() > 0 || blackArray.size() > 0) {
-            if (blackArray.size() > 0&&isWhite) {
+            if (blackArray.size() > 0 && isWhite) {
                 int blackIndex = blackArray.size() - 1;
-                if (isGameOver){
+                if (isGameOver) {
                     isGameOver = !isGameOver;
                 }
                 blackArray.remove(blackIndex);
                 isWhite = !isWhite;
                 invalidate();
-            } else if (whiteArray.size() > 0 && !isWhite){
+            } else if (whiteArray.size() > 0 && !isWhite) {
                 int whiteIndex = whiteArray.size() - 1;
-                if (isGameOver){
+                if (isGameOver) {
                     isGameOver = !isGameOver;
                 }
                 whiteArray.remove(whiteIndex);
                 isWhite = !isWhite;
                 invalidate();
             }
-        }else {
-            Toast.makeText(getContext(),"没棋了!",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getContext(), "没棋了!", Toast.LENGTH_SHORT).show();
         }
     }
+
     //判断棋盘上棋子是否为空
-    public boolean isPanelEmpty(){
-        if (whiteArray.size() > 0 || blackArray.size() > 0){
+    public boolean isPanelEmpty() {
+        if (whiteArray.size() > 0 || blackArray.size() > 0) {
             return false;
-        }else {
+        } else {
             return true;
         }
     }
