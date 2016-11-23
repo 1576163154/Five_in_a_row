@@ -1,14 +1,14 @@
 package com.example.administrator.five_in_a_row.view;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AlertDialog;
@@ -23,12 +23,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.five_in_a_row.R;
-import com.example.administrator.five_in_a_row.activity.GameActivity;
-import com.example.administrator.five_in_a_row.activity.MenuActivity;
 import com.example.administrator.five_in_a_row.util.Planel;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Administrator on 2016/8/16.
@@ -55,6 +52,16 @@ public class ChessPanel extends View {
     private float lineheight;
     private int MAX_LINE = 10;//行数可作为view属性 公开
     private int pieceWidth;//棋子宽度
+    //音效相关
+    private SoundPool sp_chess;
+    private int sp_chessId;//落子音效文件id
+    private SoundPool sp_victory;
+    private int sp_victory_id;
+    public void setPlayAudio(boolean playAudio) {
+        isPlayAudio = playAudio;
+    }
+
+    private boolean isPlayAudio = true;//默认播放音效
 
     public boolean isGameOver() {
         return isGameOver;
@@ -78,6 +85,11 @@ public class ChessPanel extends View {
         //获取棋子图片 位图
         wpiece = BitmapFactory.decodeResource(getResources(), R.drawable.wpic);
         bpiece = BitmapFactory.decodeResource(getResources(), R.drawable.bpic);
+
+        sp_chess = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);//同时播放音效数量，类型，质量
+        sp_chessId = sp_chess.load(getContext(), R.raw.chess, 1);//上下文，资源文件，优先级
+        sp_victory = new SoundPool(4,AudioManager.STREAM_MUSIC,100);
+        sp_victory_id = sp_victory.load(getContext(),R.raw.victory,1);
     }
 
 
@@ -169,6 +181,9 @@ public class ChessPanel extends View {
             canvas.drawBitmap(wpiece, whitePoint.x * lineheight + lineheight / 8,
                     whitePoint.y * lineheight + lineheight / 8, null);
             lastWhitePoint = whiteArray.get(m - 1);
+            if (isPlayAudio && !isGameOver) {
+                sp_chess.play(sp_chessId, 1f, 1f, 1, 0, 2);
+            }
         }
         int n = blackArray.size();
         for (int i = 0; i < n; i++) {
@@ -176,6 +191,9 @@ public class ChessPanel extends View {
             canvas.drawBitmap(bpiece, blackPoint.x * lineheight + lineheight / 8,
                     blackPoint.y * lineheight + lineheight / 8, null);
             lastBlackPoint = blackArray.get(n - 1);
+            if (isPlayAudio && !isGameOver) {
+                sp_chess.play(sp_chessId, 1f, 1f, 1, 0, 2);
+            }
         }
         Paint redPaint = new Paint();
         redPaint.setColor(Color.RED);
@@ -221,14 +239,18 @@ public class ChessPanel extends View {
         if (whiteWin || blackWin) {
             isGameOver = true;
             isWhiteWinner = whiteWin;
+            if (isPlayAudio) {
+                sp_victory.play(sp_victory_id, 1f, 1f, 1, 0, 1);
+            }
             final AlertDialog winnerDialog = new AlertDialog.Builder(getContext()).create();
             winnerDialog.show();
+            winnerDialog.setCancelable(false);
             Window window = winnerDialog.getWindow();
             window.setContentView(R.layout.gameover_dialog);
             Button btn_onemoregame = (Button) window.findViewById(R.id.btn_win_onemoregame);
             Button btn_nomoregame = (Button) window.findViewById(R.id.btn_win_nomoregame);
             TextView tv_winner = (TextView) window.findViewById(R.id.tv_winner);
-            tv_winner.setText(isWhiteWinner?"白棋胜利！":"黑棋胜利！");
+            tv_winner.setText(isWhiteWinner ? "白棋胜利！" : "黑棋胜利！");
             btn_nomoregame.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
