@@ -28,6 +28,8 @@ public class MenuActivity extends AppCompatActivity{
 
     private TextView tv_startGame;
     private TextView tv_exit;
+    private TextView tv_about;
+    private TextView tv_setting;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +41,8 @@ public class MenuActivity extends AppCompatActivity{
     private void initWidget() {
         tv_startGame = (TextView) findViewById(R.id.tv_gamestart);
         tv_exit = (TextView) findViewById(R.id.tv_exit);
+        tv_setting = (TextView) findViewById(R.id.tv_setting);
+        tv_about = (TextView) findViewById(R.id.tv_about);
     }
 
     private void setWidget() {
@@ -74,6 +78,20 @@ public class MenuActivity extends AppCompatActivity{
                         exitDialog.dismiss();
                     }
                 });
+            }
+        });
+        tv_about.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MenuActivity.this,AboutActivity.class));
+                overridePendingTransition(R.anim.fade,R.anim.hold);
+            }
+        });
+        tv_setting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MenuActivity.this,SettingActivity.class));
+                overridePendingTransition(R.anim.fade,R.anim.hold);
             }
         });
     }

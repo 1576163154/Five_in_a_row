@@ -86,6 +86,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_back:
                 if (chessPanel.isPanelEmpty() || chessPanel.isGameOver()) {
                     startActivity(new Intent(GameActivity.this, MenuActivity.class));
+                    overridePendingTransition(R.anim.fade,R.anim.hold);
                 } else {
                     //弹窗询问
                     final AlertDialog backDialog = new AlertDialog.Builder(GameActivity.this).create();
@@ -104,6 +105,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void onClick(View v) {
                             startActivity(new Intent(GameActivity.this, MenuActivity.class));
+                            overridePendingTransition(R.anim.fade,R.anim.hold);
                         }
                     });
                 }
