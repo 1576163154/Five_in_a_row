@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 
@@ -36,6 +37,14 @@ public class AboutActivity extends AppCompatActivity {
                 overridePendingTransition(R.anim.fade,R.anim.hold);
             }
         });
+    }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == event.KEYCODE_BACK){
+            startActivity(new Intent(AboutActivity.this, MenuActivity.class));
+            overridePendingTransition(R.anim.fade,R.anim.hold);
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
 }

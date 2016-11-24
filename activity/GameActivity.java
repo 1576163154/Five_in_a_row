@@ -176,6 +176,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         window.setContentView(R.layout.gameactivity_menu_dialog);
         TextView tv_resume = (TextView) window.findViewById(R.id.tv_gameactivity_resume);
         TextView tv_newgame = (TextView) window.findViewById(R.id.tv_newgame);
+        TextView tv_gamesetting = (TextView) window.findViewById(R.id.tv_gamesetting);
         tv_resume.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -190,6 +191,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         //游戏设置 暂定
+        tv_gamesetting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                menuDialog.dismiss();
+                startActivity(new Intent(GameActivity.this,SettingActivity.class));
+                overridePendingTransition(R.anim.fade,R.anim.hold);
+            }
+        });
         return false;//不弹出默认的菜单弹出
     }
 

@@ -23,6 +23,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.five_in_a_row.R;
+import com.example.administrator.five_in_a_row.activity.GameActivity;
+import com.example.administrator.five_in_a_row.activity.MenuActivity;
+import com.example.administrator.five_in_a_row.activity.SettingActivity;
 import com.example.administrator.five_in_a_row.util.Planel;
 
 import java.util.ArrayList;
@@ -39,7 +42,12 @@ public class ChessPanel extends View {
 
     private ArrayList<Point> whiteArray = new ArrayList<>();//声明两个 存储 用户touch坐标x，y的泛型数组
     private ArrayList<Point> blackArray = new ArrayList<>();
-    private boolean isWhite = false;//声明一个布尔类型 确定 白棋先手，当前该谁
+
+    public static void setWhite(boolean white) {
+        isWhite = white;
+    }
+
+    private static boolean isWhite ;//声明一个布尔类型 确定 白棋先手，当前该谁
     private Point lastWhitePoint;//白棋当前最后一步
     private Point lastBlackPoint;
 
@@ -57,11 +65,11 @@ public class ChessPanel extends View {
     private int sp_chessId;//落子音效文件id
     private SoundPool sp_victory;
     private int sp_victory_id;
-    public void setPlayAudio(boolean playAudio) {
+    public static void setPlayAudio(boolean playAudio) {
         isPlayAudio = playAudio;
     }
 
-    private boolean isPlayAudio = true;//默认播放音效
+    private static boolean isPlayAudio;//默认播放音效,这里获取到的为false
 
     public boolean isGameOver() {
         return isGameOver;
@@ -181,7 +189,7 @@ public class ChessPanel extends View {
             canvas.drawBitmap(wpiece, whitePoint.x * lineheight + lineheight / 8,
                     whitePoint.y * lineheight + lineheight / 8, null);
             lastWhitePoint = whiteArray.get(m - 1);
-            if (isPlayAudio && !isGameOver) {
+            if (isPlayAudio == true && !isGameOver) {
                 sp_chess.play(sp_chessId, 1f, 1f, 1, 0, 2);
             }
         }
@@ -191,7 +199,7 @@ public class ChessPanel extends View {
             canvas.drawBitmap(bpiece, blackPoint.x * lineheight + lineheight / 8,
                     blackPoint.y * lineheight + lineheight / 8, null);
             lastBlackPoint = blackArray.get(n - 1);
-            if (isPlayAudio && !isGameOver) {
+            if (isPlayAudio == true && !isGameOver ) {
                 sp_chess.play(sp_chessId, 1f, 1f, 1, 0, 2);
             }
         }
@@ -239,7 +247,7 @@ public class ChessPanel extends View {
         if (whiteWin || blackWin) {
             isGameOver = true;
             isWhiteWinner = whiteWin;
-            if (isPlayAudio) {
+            if (isPlayAudio == true) {
                 sp_victory.play(sp_victory_id, 1f, 1f, 1, 0, 1);
             }
             final AlertDialog winnerDialog = new AlertDialog.Builder(getContext()).create();
@@ -274,6 +282,7 @@ public class ChessPanel extends View {
         blackArray.clear();
         isGameOver = false;
         isWhiteWinner = false;
+        isWhite = MenuActivity.isGameWhoFirst();
         invalidate();//重绘
     }
 
