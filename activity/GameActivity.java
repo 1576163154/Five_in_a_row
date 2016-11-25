@@ -15,6 +15,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -27,6 +28,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     private ChessPanel chessPanel;
     private TextView tv_title_who;//该谁落子
     private Button btn_back;//返回
+    private Button btn_menu;
     private Button btn_withdraw;//悔棋
     private Resources res;
 
@@ -36,6 +38,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        // 隐藏状态栏
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_game);
         Log.i("UI线程id：", String.valueOf(Thread.currentThread().getId()));
         ExitApplication.getInstance().addActivity(this);
@@ -52,11 +58,13 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         tv_title_who = (TextView) findViewById(R.id.tv_title_who);
 
         btn_back = (Button) findViewById(R.id.btn_back);
+        btn_menu = (Button) findViewById(R.id.btn_menu);
         btn_withdraw = (Button) findViewById(R.id.btn_withdraw);
     }
 
     private void setWidget() {
         btn_back.setOnClickListener(this);
+        btn_menu.setOnClickListener(this);
         btn_withdraw.setOnClickListener(this);
 //异步任务，改变tv_who文本信息
         th_whoturn = new Thread(new Runnable() {
@@ -109,6 +117,38 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     });
                 }
+                break;
+            case R.id.btn_menu:
+                //新建AlertDialog
+                final AlertDialog menuDialog = new AlertDialog.Builder(GameActivity.this).create();
+                menuDialog.show();
+                Window window = menuDialog.getWindow();
+                window.setContentView(R.layout.gameactivity_menu_dialog);
+                TextView tv_resume = (TextView) window.findViewById(R.id.tv_gameactivity_resume);
+                TextView tv_newgame = (TextView) window.findViewById(R.id.tv_newgame);
+                TextView tv_gamesetting = (TextView) window.findViewById(R.id.tv_gamesetting);
+                tv_resume.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        menuDialog.dismiss();
+                    }
+                });
+                tv_newgame.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        chessPanel.oneMoreGame();
+                        menuDialog.dismiss();
+                    }
+                });
+                //游戏设置 暂定
+                tv_gamesetting.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        menuDialog.dismiss();
+                        startActivity(new Intent(GameActivity.this,SettingActivity.class));
+                        overridePendingTransition(R.anim.fade,R.anim.hold);
+                    }
+                });
                 break;
             default:
                 break;

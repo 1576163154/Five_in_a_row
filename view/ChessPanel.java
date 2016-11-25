@@ -37,7 +37,7 @@ public class ChessPanel extends View {
 
     private Bitmap wpiece;
     private Bitmap bpiece;//可作为属性
-    private float ratio = 3 / 4 * 1.0f;//设置棋子大小为行高的3/4
+    private float ratio = 3 * 1.0f/ 4 ;//设置棋子大小为行高的3/4
     private WindowManager windowManager = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
 
     private ArrayList<Point> whiteArray = new ArrayList<>();//声明两个 存储 用户touch坐标x，y的泛型数组
@@ -47,7 +47,7 @@ public class ChessPanel extends View {
         isWhite = white;
     }
 
-    private static boolean isWhite ;//声明一个布尔类型 确定 白棋先手，当前该谁
+    private static boolean isWhite;//声明一个布尔类型 确定 白棋先手，当前该谁
     private Point lastWhitePoint;//白棋当前最后一步
     private Point lastBlackPoint;
 
@@ -65,6 +65,7 @@ public class ChessPanel extends View {
     private int sp_chessId;//落子音效文件id
     private SoundPool sp_victory;
     private int sp_victory_id;
+
     public static void setPlayAudio(boolean playAudio) {
         isPlayAudio = playAudio;
     }
@@ -96,8 +97,8 @@ public class ChessPanel extends View {
 
         sp_chess = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);//同时播放音效数量，类型，质量
         sp_chessId = sp_chess.load(getContext(), R.raw.chess, 1);//上下文，资源文件，优先级
-        sp_victory = new SoundPool(4,AudioManager.STREAM_MUSIC,100);
-        sp_victory_id = sp_victory.load(getContext(),R.raw.victory,1);
+        sp_victory = new SoundPool(4, AudioManager.STREAM_MUSIC, 100);
+        sp_victory_id = sp_victory.load(getContext(), R.raw.victory, 1);
     }
 
 
@@ -129,10 +130,11 @@ public class ChessPanel extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         panelwidth = w;
-        lineheight = (float) panelwidth / MAX_LINE;
+        lineheight =  panelwidth*1.0f/ MAX_LINE;
         pieceWidth = (int) (lineheight * ratio + 0.5);//动态确定棋子大小
-        wpiece = Bitmap.createScaledBitmap(wpiece, 57, 57, false);
-        bpiece = Bitmap.createScaledBitmap(bpiece, 57, 57, false);
+
+        wpiece = Bitmap.createScaledBitmap(wpiece, pieceWidth, pieceWidth, false);
+        bpiece = Bitmap.createScaledBitmap(bpiece, pieceWidth, pieceWidth, false);
     }
 
     @Override
@@ -186,8 +188,8 @@ public class ChessPanel extends View {
         for (int i = 0; i < m; i++) {
             Point whitePoint = whiteArray.get(i);//这里拿到的坐标是之前变换过，跟实际画布坐标不符。
             //另外画位图，和画文本类似。起点坐标都为所画位图的左上角（注 坐标原点在画布左上角）
-            canvas.drawBitmap(wpiece, whitePoint.x * lineheight + lineheight / 8,
-                    whitePoint.y * lineheight + lineheight / 8, null);
+            canvas.drawBitmap(wpiece, (whitePoint.x + (1 - ratio) / 2) * lineheight ,
+                    (whitePoint.y + (1 - ratio) / 2) * lineheight , null);
             lastWhitePoint = whiteArray.get(m - 1);
             if (isPlayAudio == true && !isGameOver) {
                 sp_chess.play(sp_chessId, 1f, 1f, 1, 0, 2);
@@ -196,10 +198,10 @@ public class ChessPanel extends View {
         int n = blackArray.size();
         for (int i = 0; i < n; i++) {
             Point blackPoint = blackArray.get(i);
-            canvas.drawBitmap(bpiece, blackPoint.x * lineheight + lineheight / 8,
-                    blackPoint.y * lineheight + lineheight / 8, null);
+            canvas.drawBitmap(bpiece, (blackPoint.x + (1 - ratio) / 2) * lineheight ,
+                    (blackPoint.y + (1 - ratio) / 2) * lineheight , null);
             lastBlackPoint = blackArray.get(n - 1);
-            if (isPlayAudio == true && !isGameOver ) {
+            if (isPlayAudio == true && !isGameOver) {
                 sp_chess.play(sp_chessId, 1f, 1f, 1, 0, 2);
             }
         }
@@ -209,10 +211,10 @@ public class ChessPanel extends View {
         redPaint.setStyle(Paint.Style.STROKE);
         if (m > 0 && !isWhite) {
             //给白棋最后一个棋子画个圆圈
-            canvas.drawCircle(lastWhitePoint.x * lineheight + lineheight / 2, lastWhitePoint.y * lineheight + lineheight / 2, 29f, redPaint);
+            canvas.drawCircle(lastWhitePoint.x * lineheight + lineheight / 2, lastWhitePoint.y * lineheight + lineheight / 2, pieceWidth/2, redPaint);
         } else if (n > 0 && isWhite) {
             //同理给黑棋
-            canvas.drawCircle(lastBlackPoint.x * lineheight + lineheight / 2, lastBlackPoint.y * lineheight + lineheight / 2, 29f, redPaint);
+            canvas.drawCircle(lastBlackPoint.x * lineheight + lineheight / 2, lastBlackPoint.y * lineheight + lineheight / 2, pieceWidth/2, redPaint);
         }
     }
 
